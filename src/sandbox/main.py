@@ -4,7 +4,7 @@ from pathlib import Path
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
-from sandbox.enviroments.multi_armed_bandit import BanditEnv, BanditTrainer, EpsilonGreedy
+from sandbox.enviroments.multi_armed_bandit import BanditEnv, BanditTrainer, EpsilonGreedy, UCB
 from sandbox.enviroments.multi_armed_bandit.env import NormalDistribution
 import numpy as np 
 
@@ -16,9 +16,12 @@ def main():
     bandits = [NormalDistribution(mean, 1) for mean in np.random.normal(0, 1, n_bandits)]
     
     env = BanditEnv(bandits)
-    policy = EpsilonGreedy(n_bandits, eps=0.1, init_value=0)
+    policy1 = EpsilonGreedy(n_bandits, eps=0.1, init_value=0)
+    policy2 = UCB(n_bandits, init_value=0)
+    policy3 = EpsilonGreedy(n_bandits, eps=0.1, init_value=0)
 
-    trainer = BanditTrainer(env, policy)
+
+    trainer = BanditTrainer(env, [policy1, policy2, policy3])
     _ = trainer.train(n_episodes)
 
     trainer.display_history()
