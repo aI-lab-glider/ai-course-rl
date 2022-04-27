@@ -1,14 +1,20 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import math
+from typing import Optional
 
 
 class BanditPolicy(ABC):
-    def __init__(self, n_bandits: int, init_value: float = 0.0) -> None:
+    def __init__(self, n_bandits: int, init_value: float = 0.0, name: Optional[str]=None) -> None:
         self.n_bandits = n_bandits
         self.avg_reward = [init_value] * self.n_bandits
         self.n_calls = [0] * self.n_bandits
         self.t = 1
+        self._name = name or type(self).__name__
+
+    @property 
+    def name(self) -> str:
+        return self._name
 
     @abstractmethod
     def action(self) -> int:
@@ -24,8 +30,8 @@ class BanditPolicy(ABC):
 
 
 class EpsilonGreedy(BanditPolicy):
-    def __init__(self, n_bandits: int, eps: float = 0.1, init_value: float = 0.0):
-        super().__init__(n_bandits, init_value)
+    def __init__(self, n_bandits: int, eps: float = 0.1, init_value: float = 0.0, name: Optional[str]=None):
+        super().__init__(n_bandits, init_value, name=name)
         self.eps = eps
 
     def action(self) -> int:

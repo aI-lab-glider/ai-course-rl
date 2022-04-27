@@ -16,9 +16,9 @@ def main():
     bandits = [NormalDistribution(mean, 1) for mean in np.random.normal(0, 1, n_bandits)]
     
     env = BanditEnv(bandits)
-    policy1 = EpsilonGreedy(n_bandits, eps=0.1, init_value=0)
+    policy1 = EpsilonGreedy(n_bandits, eps=0.1, init_value=0, name="EpsilonGreedy")
     policy2 = UCB(n_bandits, init_value=0)
-    policy3 = EpsilonGreedy(n_bandits, eps=0.1, init_value=0)
+    policy3 = EpsilonGreedy(n_bandits, eps=0.1, init_value=5, name="EpsilonGreedy optimistic")
     policy4 = ThompsonSampling(n_bandits, init_value=0)
 
 

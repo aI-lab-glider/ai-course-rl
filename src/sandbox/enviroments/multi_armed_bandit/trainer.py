@@ -38,7 +38,7 @@ class BanditTrainer:
         plt.xlabel("Steps")
         plt.ylabel("Average reward")
         for p, avg_reward in zip(self._policies, policies_avg_reward.T):
-            plt.plot(range(n), avg_reward, label=type(p).__name__)
+            plt.plot(range(n), avg_reward, label=p.name)
 
         distr = self._env.distributions
         optimal_action = max(range(len(distr)), key=lambda d: distr[d].mean)
@@ -51,7 +51,7 @@ class BanditTrainer:
         plt.xlabel("Steps")
         plt.ylabel("% Optimal action")
         for p, optimal_action_arr in zip(self._policies, pr_optimal_action.T):
-            plt.plot(range(n), optimal_action_arr, label=type(p).__name__)
+            plt.plot(range(n), optimal_action_arr, label=p.name)
 
         plt.legend()
         plt.show()
