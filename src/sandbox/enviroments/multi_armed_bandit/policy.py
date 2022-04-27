@@ -8,6 +8,7 @@ class BanditPolicy(ABC):
         self.n_bandits = n_bandits
         self.avg_reward = [init_value] * self.n_bandits
         self.n_calls = [0] * self.n_bandits
+        self.t = 1
 
     @abstractmethod
     def action(self) -> int:
@@ -19,6 +20,7 @@ class BanditPolicy(ABC):
         self.avg_reward[action] = (n * self.avg_reward[action] + reward) / self.n_calls[
             action
         ]
+        self.t += 1
 
 
 class EpsilonGreedy(BanditPolicy):
@@ -43,10 +45,6 @@ class UCB(BanditPolicy):
         ]
         return np.argmax(ucb_scores)
 
-    def update(self, action: int, reward: float) -> None:
-        self.t += 1
-        return super().update(action, reward)
-
     @staticmethod
     def ucb(
         mean_reward: float, action_counter: int, episode_number: int, c: int = 1.4
@@ -55,3 +53,26 @@ class UCB(BanditPolicy):
             return float("inf")
         return mean_reward + c * (np.sqrt(math.log(episode_number) / action_counter))
 
+
+class ThompsonSampling(BanditPolicy):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.t = 0
+        self._precisions = np.full(self.n_bandits, 0.001)
+        self._means = np.full(self.n_bandits, 5)
+
+    def action(self) -> int:
+        samples = list(map(self.sample, range(self.n_bandits)))
+        return np.argmax(samples)
+
+    def sample(self, bandit_idx) -> float:
+        return np.random.normal(self._means[bandit_idx], 1 / np.sqrt(self._precisions[bandit_idx]))
+
+    def update(self, action: int, reward: float) -> None:
+        # update asssumes that the variance of the bandits = 1
+        prec = self._precisions[action]
+        mean = self._means[action]
+
+        self._means[action] = (prec*mean + self.n_calls[action]*self.avg_reward[action]) / (prec + self.n_calls[action])
+        self._precisions[action] += 1 
+        return super().update(action, reward)
