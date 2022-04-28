@@ -7,6 +7,7 @@ from collections import namedtuple
 NormalDistribution = namedtuple("NormalDistribution", "mean std")
 
 
+
 class BanditEnv(gym.Env):
 
     def __init__(self, reward_distributions: list[NormalDistribution]):

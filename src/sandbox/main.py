@@ -1,31 +1,34 @@
-import sys 
+import sys
 from pathlib import Path
 
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
-from sandbox.enviroments.multi_armed_bandit import BanditEnv, BanditTrainer, EpsilonGreedy, UCB, ThompsonSampling
-from sandbox.enviroments.multi_armed_bandit.env import NormalDistribution
-import numpy as np 
+import gym
+from sandbox.algorithms.td_zero.td_zero import TDZero
+from sandbox.wrappers.stats_wrapper import StatsWrapper
+from sandbox.policies.generic_policies import EpsilonGreedyPolicy, GreedyPolicy
+from sandbox.algorithms.q_learning.qlearning import QLearning
+
+from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
+
+import matplotlib.pyplot as plt
 
 
 def main():
-    np.random.seed(2)
-    n_bandits = 10
-    n_episodes = 10000
-    bandits = [NormalDistribution(mean, 1) for mean in np.random.normal(0, 1, n_bandits)]
+
+    env = gym.make("CliffWalking-v0")
+    env = StatsWrapper(env)
+    env = DiscreteEnvironment(env)
     
-    env = BanditEnv(bandits)
-    policy1 = EpsilonGreedy(n_bandits, eps=0.1, name="EpsilonGreedy")
-    policy2 = UCB(n_bandits, init_value=0)
-    policy3 = EpsilonGreedy(n_bandits, eps=0.1, init_value=5, name="EpsilonGreedy optimistic")
-    policy4 = ThompsonSampling(n_bandits)
-
-
-    trainer = BanditTrainer(env, [policy1, policy2, policy3, policy4])
-    _ = trainer.train(n_episodes)
-
-    trainer.history.display()
+    policy = EpsilonGreedyPolicy(0.1)
+    algorithm = QLearning(0.1, 0.5, policy)
+    agent = algorithm.run(100, env)
+    
+    cumulated_reward = [s.cumulative_reward for s in env.stats]
+    plt.plot(cumulated_reward)
+    plt.show()
+    env.close()
 
 
 if __name__ == '__main__':
