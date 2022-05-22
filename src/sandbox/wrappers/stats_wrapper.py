@@ -1,6 +1,8 @@
 from dataclasses import astuple, dataclass, asdict
 from typing import Optional, Tuple
 import gym
+import matplotlib.pyplot as plt
+import numpy as np
 
 @dataclass
 class Statistic:
@@ -18,7 +20,6 @@ STATS_KEY = 'episode_stats'
 
 class StatsWrapper(gym.Wrapper):
 
-    
     def __init__(self, env: gym.Env):
         super().__init__(env)
         self.stats = []
@@ -37,3 +38,37 @@ class StatsWrapper(gym.Wrapper):
         self._current_statistic = Statistic(0, 0)
         return super().reset(**kwargs)
         
+    def plot(self):
+        cumulated_reward = [s.cumulative_reward for s in self.stats]
+        steps_count = [s.steps_count for s in self.stats]
+        fig, ax = plt.subplots(figsize=(10, 10),
+                               nrows=3,
+                               ncols=1,
+                               constrained_layout=True)
+        ax[0].set_title("Episode Reward over Time")
+        ax[0].set_ylabel("Reward")
+        ax[0].set_xlabel("Time")
+        ax[0].grid(axis='y', which='major')
+        ax[0].plot(cumulated_reward,
+                   '-',
+                   c='orange',
+                   linewidth=2)
+
+        ax[1].set_title("Episode Length over Time")
+        ax[1].set_ylabel("Episode Length")
+        ax[1].set_xlabel("Time")
+        ax[1].grid(axis='y', which='major')
+        ax[1].plot(steps_count,
+                   '-',
+                   c='orange',
+                   linewidth=2)
+
+        ax[2].set_title("Episode per time step")
+        ax[2].set_xlabel("Episode Length")
+        ax[2].set_ylabel("Number of Episodes")
+        ax[2].hist(steps_count,
+                   color='orange',
+                   bins=len(self.stats))
+
+        fig.show()
+

@@ -23,11 +23,9 @@ def main():
     
     policy = EpsilonGreedyPolicy(0.1)
     algorithm = QLearning(0.5, 1, policy)
-    agent = algorithm.run(500, env)
+    agent = algorithm.run(300, env)
     
-    cumulated_reward = [s.cumulative_reward for s in env.stats]
-    plt.plot(cumulated_reward)
-    plt.show()
+    env.plot()
     env.close()
 
 
