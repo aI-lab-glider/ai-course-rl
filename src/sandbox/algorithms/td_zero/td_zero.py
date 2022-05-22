@@ -54,8 +54,8 @@ class TDZero(Algorithm[ObsType, ActType, StateValueAgent]):
 
     def _calculate_expected_reward(self, from_observation: ObsType, next_observation: ObsType, reward: float, state_value_estimates: dict[ObsType, float]):
         curr_observation_reward = state_value_estimates.setdefault(from_observation, random.random())
-        difference = state_value_estimates.setdefault(next_observation, random.random()) - curr_observation_reward
-        return curr_observation_reward + self._alpha * (reward + difference)
+        td_delta = state_value_estimates.setdefault(next_observation, random.random()) - curr_observation_reward
+        return curr_observation_reward + self._alpha * (reward + td_delta)
 
     def _create_observation_to_action_mapping(self, env: DiscreteEnvironment[ObsType, ActType], state_value_estimates: dict[ObsType, float]) -> dict[ObsType, ActType]:
         result = {}

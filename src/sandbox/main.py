@@ -22,8 +22,8 @@ def main():
     env = DiscreteEnvironment(env)
     
     policy = EpsilonGreedyPolicy(0.1)
-    algorithm = QLearning(0.1, 0.5, policy)
-    agent = algorithm.run(100, env)
+    algorithm = QLearning(0.5, 1, policy)
+    agent = algorithm.run(500, env)
     
     cumulated_reward = [s.cumulative_reward for s in env.stats]
     plt.plot(cumulated_reward)
