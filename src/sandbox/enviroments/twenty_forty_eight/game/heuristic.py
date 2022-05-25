@@ -1,6 +1,6 @@
 import numpy as np
 
-from sandbox.enviroments.twenty_forty_eight.base.heuristic import Heuristic
+from sandbox.enviroments.twenty_forty_eight.game.base.heuristic import Heuristic
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
 from sandbox.enviroments.twenty_forty_eight.game.game import TwentyFortyEightGame
 

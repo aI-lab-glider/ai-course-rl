@@ -1,9 +1,9 @@
 from typing import List, Tuple
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
 from sandbox.enviroments.twenty_forty_eight.game.action import TwentyFortyEightPlayerAction, TwentyFortyEightOpponentAction, Direction
-from sandbox.enviroments.twenty_forty_eight.base.game import Game
+from sandbox.enviroments.twenty_forty_eight.game.base.game import Game
 from PIL import Image, ImageFont
-#from utils.pil_utils import GridDrawer
+from sandbox.enviroments.twenty_forty_eight.game.utils.pil_utils import GridDrawer
 import numpy as np
 import random
 from itertools import product
@@ -78,7 +78,6 @@ class TwentyFortyEightGame(Game):
         pass
 
     def to_image(self, state: TwentyFortyEightState, size: Tuple[int, int] = (800, 800)) -> Image.Image:
-        return
         background_color = (255, 233, 208)
         image = Image.new("RGB", size, background_color)
         grid_drawer = GridDrawer(image, state)

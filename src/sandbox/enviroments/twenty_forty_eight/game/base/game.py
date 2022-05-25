@@ -1,6 +1,6 @@
-from sandbox.enviroments.twenty_forty_eight.base.state import State
-from sandbox.enviroments.twenty_forty_eight.base.action import Action
-from typing import Iterable, List, TypeVar, Generic, Optional, Tuple
+from sandbox.enviroments.twenty_forty_eight.game.base.state import State
+from sandbox.enviroments.twenty_forty_eight.game.base.action import Action
+from typing import Iterable, TypeVar, Generic, Optional, Tuple
 from abc import ABC, abstractmethod
 from PIL.Image import Image
 
