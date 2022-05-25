@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras

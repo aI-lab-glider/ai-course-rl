@@ -1,10 +1,10 @@
 from sandbox.algorithms.dqn.replay_buffer import ReplayMemory, Transition
-from sandbox.algorithms.dqn.policy import MyQNetwork, QNetwork, epsilon_greedy_policy
+from sandbox.algorithms.dqn.policy import QNetwork
 
 import gym
+import gym.spaces
 from abc import ABC
 from typing import Callable
-import gym.spaces
 import numpy as np
 import tensorflow as tf
 
@@ -68,7 +68,7 @@ class DQNAlgorithm:
         next_Q_values = self.network.predict(next_states)
         best_next_actions = np.argmax(next_Q_values, axis=1)
         next_mask = tf.one_hot(best_next_actions, self.env.action_space.n).numpy()
-        
+
         next_target_Q_values = (
             self.target_network.predict(next_states) * next_mask
         ).sum(axis=1)
@@ -80,16 +80,3 @@ class DQNAlgorithm:
         mask = tf.one_hot(actions, self.env.action_space.n)
 
         self.network.update(states, mask, target_Q_values)
-
-
-if __name__ == "__main__":
-
-    env = gym.make("CartPole-v1")
-    dqn = DQNAlgorithm(
-        env,
-        memory_size=2000,
-        network=MyQNetwork,
-        policy=lambda *args: epsilon_greedy_policy(0.01, *args),
-        learning_rate=1e-4,
-    )
-    dqn.train(6, 200, 50, 50)
