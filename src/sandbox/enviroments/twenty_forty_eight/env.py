@@ -3,6 +3,7 @@ from numpy.typing import NDArray
 import gym
 import numpy as np
 import random
+from math import log
 
 from sandbox.enviroments.twenty_forty_eight.game.game import TwentyFortyEightGame
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
@@ -15,12 +16,13 @@ class TwentyFortyEightEnv(gym.Env):
         self.game = TwentyFortyEightGame()
         self.heuristic = TwentyFortyEightHeuristic(self.game)
         self.state = self.game.initial_game_state()
-        self.observation_space = gym.spaces.Box(0, 2048, (self.game.board_dim*self.game.board_dim, ), dtype=np.uint32)
+        self.observation_space = gym.spaces.MultiDiscrete([12 for _ in range(self.game.board_dim**2)], dtype=np.uint32)
         self.action_space = gym.spaces.Discrete(4)
         self.invalid_move_threshold = invalid_move_threshold
         self.invalid_move_percentage = invalid_move_percentage
-        self._total_count = 0
-        self._invalid_count = 0
+        self._total_action_count = 0
+        self._invalid_action_count = 0
+        self._images = []
 
     def step(self, action: int) -> Tuple[NDArray, float, bool, dict]:
         new_state = self._update_state(action)
@@ -30,37 +32,46 @@ class TwentyFortyEightEnv(gym.Env):
             done = True
             reward = -np.inf
         self.state = new_state
-        observation = self.state.board.flatten().astype(np.uint32)
+        observation = self.to_exponents(self.state.board.flatten())
         info = {}
         return observation, float(reward), done, info
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> Union[
         NDArray, tuple[NDArray, dict]]:
         self.state = self.game.initial_game_state()
-        self._total_count = 0
-        self._invalid_count = 0
-        return self.state.board.flatten().astype(np.uint32)
+        self._total_action_count = 0
+        self._invalid_action_count = 0
+        self._images = [self.game.to_image(self.state)]
+        return self.to_exponents(self.state.board.flatten())
 
     def render(self, mode="human"):
-        pass
+        self._images += self.game.to_image(self.state)
 
     def _update_state(self, action: int) -> TwentyFortyEightState:
-        self._total_count += 1
+        self._total_action_count += 1
         game_action = self.get_action(action)
         if self.game._is_valid_move(game_action.direction, self.state):
             new_state = self.game.take_action(self.state, game_action)
             new_state = self.game.take_action(new_state,
                                               random.choice(self.game.actions_for(new_state, is_opponent=True)))
         else:
-            self._invalid_count += 1
+            self._invalid_action_count += 1
             new_state = self.state
         return new_state
 
     def _too_many_invalid(self) -> bool:
-        return self._invalid_count > self.invalid_move_threshold \
-            and self._invalid_count > self._total_count * self.invalid_move_percentage
+        return self._invalid_action_count > self.invalid_move_threshold \
+            and self._invalid_action_count > self._total_action_count * self.invalid_move_percentage
+
+    def to_gif(self, img_name="2048_env_game"):
+        self._images[0].save(img_name, save_all=True, append_images=self._images[1:],
+                             format='GIF', optimize=False, duration=500, loop=1)
 
     @staticmethod
     def get_action(action: int) -> TwentyFortyEightPlayerAction:
         directions = {0: Direction.LEFT, 1: Direction.RIGHT, 2: Direction.UP, 3: Direction.DOWN}
         return TwentyFortyEightPlayerAction(direction=directions[action])
+
+    @staticmethod
+    def to_exponents(flatten_board: NDArray):
+        return np.array([log(x, 2) if x != 0 else 0 for x in flatten_board], np.uint32)
