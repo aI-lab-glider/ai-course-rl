@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
-import gym.spaces
+import gym.spaces, copy 
 
 
 class QNetwork(ABC):
@@ -15,7 +15,7 @@ class QNetwork(ABC):
         self.action_space = action_space
         self.model = self.build_model()
 
-        self._loss_fn = keras.losses.mean_squared_error
+        self._loss_fn = keras.losses.Hubert()
         self.optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
 
     @abstractmethod
@@ -23,15 +23,27 @@ class QNetwork(ABC):
         ...
 
     def copy(self) -> QNetwork:
-        return keras.models.clone_model(self.model)
+        return copy.deepcopy(self)
 
     def set_weights_from(self, other: QNetwork) -> None:
         self.model.set_weights(other.model.get_weights())
 
     def predict(self, observation):
-        return self.model.predict(observation[np.newaxis])
+        obs = observation[np.newaxis] if observation.ndim < 2 else observation # if vector was given, make it an matrix
+        return self.model.predict(obs)
 
-    def update(self, states, mask, target_Q_values):
+    def update(self, states: np.ndarray, mask: np.ndarray, target_Q_values: np.ndarray) -> None:
+        """
+        Gradient update
+
+        Parameters
+            states: 2d numpy array representing batch of observations
+            mask: 2d numpy array representing batch of one-hot encoded actions, that were actually taken
+            target: 2d numpy array representing batch of target Q_values for the given states
+        returns 
+            None
+
+        """
         with tf.GradientTape() as tape:
             all_Q_values = self.model(states)
             Q_values = tf.reduce_sum(all_Q_values * mask, axis=1, keepdims=True)
@@ -59,6 +71,3 @@ def epsilon_greedy_policy(
         return action_space.sample()
     Q_values = network.predict(state)
     return int(np.argmax(Q_values))
-
-
-

@@ -30,8 +30,8 @@ class DQNAlgorithm:
         max_episode_length: int,
         exploration_steps: int,
         target_update_steps: int,
-        batch_size: int = 32,
-        discount_rate: float = 0.95,
+        batch_size: int,
+        discount_rate: float,
     ):
         self.discount_rate = discount_rate
         self.episodes_length = []
@@ -44,6 +44,7 @@ class DQNAlgorithm:
             self._training_step(batch_size)
             if episode % target_update_steps == 0:
                 self.target_network.set_weights_from(self.network)
+        return self.network
 
     def _rollout(self, max_episode_length: int):
         obs = self.env.reset()
@@ -64,17 +65,16 @@ class DQNAlgorithm:
         states, actions, next_states, rewards, dones = list(
             map(np.array, zip(*transitions))
         )
-
         next_Q_values = self.network.predict(next_states)
         best_next_actions = np.argmax(next_Q_values, axis=1)
-
         next_mask = tf.one_hot(best_next_actions, self.env.action_space.n).numpy()
-        next_best_Q_values = (self.target_network.predict(next_states) * next_mask).sum(
-            axis=1
-        )
+        
+        next_target_Q_values = (
+            self.target_network.predict(next_states) * next_mask
+        ).sum(axis=1)
 
         target_Q_values = (
-            rewards + (1 - dones) * self.discount_rate * next_best_Q_values
+            rewards + (1 - dones) * self.discount_rate * next_target_Q_values
         )
         target_Q_values = target_Q_values.reshape(-1, 1)
         mask = tf.one_hot(actions, self.env.action_space.n)
@@ -92,4 +92,4 @@ if __name__ == "__main__":
         policy=lambda *args: epsilon_greedy_policy(0.01, *args),
         learning_rate=1e-4,
     )
-    dqn.train(60, 200, 50, 50)
+    dqn.train(6, 200, 50, 50)
