@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from sandbox.enviroments.twenty_forty_eight.base.state import State
-from sandbox.enviroments.twenty_forty_eight.base.game import Game
+from sandbox.enviroments.twenty_forty_eight.game.base.state import State
+from sandbox.enviroments.twenty_forty_eight.game.base.game import Game
 
 from typing import TypeVar, Generic, Any
 

@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from dataclasses import dataclass
-from sandbox.enviroments.twenty_forty_eight.base.action import Action
+from sandbox.enviroments.twenty_forty_eight.game.base.action import Action
 from copy import deepcopy
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
 import numpy as np
