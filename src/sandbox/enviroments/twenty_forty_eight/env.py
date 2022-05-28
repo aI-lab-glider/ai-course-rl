@@ -4,6 +4,7 @@ import gym
 import numpy as np
 import random
 from math import log
+from gym.core import ObsType, ActType
 
 from sandbox.enviroments.twenty_forty_eight.game.game import TwentyFortyEightGame
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
@@ -24,7 +25,7 @@ class TwentyFortyEightEnv(gym.Env):
         self._invalid_action_count = 0
         self._images = []
 
-    def step(self, action: int) -> Tuple[NDArray, float, bool, dict]:
+    def step(self, action: int) -> Tuple[str, float, bool, dict]:
         new_state = self._update_state(action)
         reward = self.heuristic(new_state) - self.heuristic(self.state)
         done = self.game.is_terminal_state(new_state)
@@ -34,7 +35,7 @@ class TwentyFortyEightEnv(gym.Env):
         self.state = new_state
         observation = self.to_exponents(self.state.board.flatten())
         info = {}
-        return observation, float(reward), done, info
+        return str(observation), float(reward), done, info
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> Union[
         NDArray, tuple[NDArray, dict]]:
@@ -45,7 +46,7 @@ class TwentyFortyEightEnv(gym.Env):
         return self.to_exponents(self.state.board.flatten())
 
     def render(self, mode="human"):
-        self._images += self.game.to_image(self.state)
+        self._images.append(self.game.to_image(self.state))
 
     def _update_state(self, action: int) -> TwentyFortyEightState:
         self._total_action_count += 1
@@ -64,8 +65,11 @@ class TwentyFortyEightEnv(gym.Env):
             and self._invalid_action_count > self._total_action_count * self.invalid_move_percentage
 
     def to_gif(self, img_name="2048_env_game"):
+        # print("AAAAAAAAAAAAAAAAAAAA we half way there")
         self._images[0].save(img_name, save_all=True, append_images=self._images[1:],
                              format='GIF', optimize=False, duration=500, loop=1)
+        print(self._images[0])
+
 
     @staticmethod
     def get_action(action: int) -> TwentyFortyEightPlayerAction:
@@ -74,4 +78,4 @@ class TwentyFortyEightEnv(gym.Env):
 
     @staticmethod
     def to_exponents(flatten_board: NDArray):
-        return np.array([log(x, 2) if x != 0 else 0 for x in flatten_board], np.uint32)
+        return str(np.array([log(x, 2) if x != 0 else 0 for x in flatten_board], np.uint32))

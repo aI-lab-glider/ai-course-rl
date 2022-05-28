@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+
+path = Path(__file__)
+sys.path.append(str(path.parents[1].absolute()))
+
 from typing import List, Tuple
 from sandbox.enviroments.twenty_forty_eight.game.state import TwentyFortyEightState
 from sandbox.enviroments.twenty_forty_eight.game.action import TwentyFortyEightPlayerAction, TwentyFortyEightOpponentAction, Direction
@@ -84,7 +91,8 @@ class TwentyFortyEightGame(Game):
         grid_drawer.draw_grid()
 
         def font(block):
-            return ImageFont.truetype("assets/arial.ttf", size=int(grid_drawer.cell_height * (7-len(str(block)))/10))
+            return ImageFont.truetype("src/sandbox/assets/arial.ttf", size=int(grid_drawer.cell_height * (7-len(str(block)))/10))
+            
 
         block_color = {
             2: (252, 191, 73), 4: (247, 127, 0), 8: (214, 40, 40), 16: (226, 109, 92), 32: (165, 1, 4),
