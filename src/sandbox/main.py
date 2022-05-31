@@ -1,31 +1,34 @@
-import sys 
+import sys
 from pathlib import Path
+
+
 
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
-from sandbox.enviroments.multi_armed_bandit import BanditEnv, BanditTrainer, EpsilonGreedy, UCB, ThompsonSampling
-from sandbox.enviroments.multi_armed_bandit.env import NormalDistribution
-import numpy as np 
+import gym
+from sandbox.algorithms.td_zero.td_zero import TDZero
+from sandbox.wrappers.stats_wrapper import StatsWrapper
+from sandbox.algorithms.q_learning.qlearning import QLearning
+from sandbox.action_selection_rules.ucb import UCB
+from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
+from sandbox.action_selection_rules.thompson_sampling import ThompsonSampling
+
+import matplotlib.pyplot as plt
 
 
 def main():
-    np.random.seed(2)
-    n_bandits = 10
-    n_episodes = 10000
-    bandits = [NormalDistribution(mean, 1) for mean in np.random.normal(0, 1, n_bandits)]
+
+    env = gym.make("CliffWalking-v0")
+    env = StatsWrapper(env)
+    env = DiscreteEnvironment(env)
     
-    env = BanditEnv(bandits)
-    policy1 = EpsilonGreedy(n_bandits, eps=0.1, name="EpsilonGreedy")
-    policy2 = UCB(n_bandits, init_value=0)
-    policy3 = EpsilonGreedy(n_bandits, eps=0.1, init_value=5, name="EpsilonGreedy optimistic")
-    policy4 = ThompsonSampling(n_bandits)
-
-
-    trainer = BanditTrainer(env, [policy1, policy2, policy3, policy4])
-    _ = trainer.train(n_episodes)
-
-    trainer.history.display()
+    action_selection_rule = ThompsonSampling()
+    algorithm = QLearning(0.5, 1, action_selection_rule)
+    agent = algorithm.run(300, env)
+    
+    env.plot()
+    env.close()
 
 
 if __name__ == '__main__':

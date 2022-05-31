@@ -1,10 +1,10 @@
-from unicodedata import name
 import gym
 import numpy as np 
 from collections import namedtuple
 
 
 NormalDistribution = namedtuple("NormalDistribution", "mean std")
+
 
 
 class BanditEnv(gym.Env):
@@ -22,8 +22,7 @@ class BanditEnv(gym.Env):
             raise ValueError(f"Unsupported action {action} for action space {self.action_space}")
         
         bandit = self.distributions[action]
-
-        reward = np.random.normal(bandit.mean, bandit.std) # TODO: use self._np_random somehow
+        reward = np.random.normal(bandit.mean, bandit.std)
         done = False 
         info = {}
         return self._observation, reward, done, info
