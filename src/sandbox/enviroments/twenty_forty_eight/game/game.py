@@ -106,3 +106,8 @@ class TwentyFortyEightGame(Game):
                     grid_drawer.draw_text(str(cell), (x, y), fill=(51, 44, 35), font=font(cell))
 
         return image
+
+    def to_ansi(self, state: TwentyFortyEightState):
+        rows = ["|".join([f"{i: ^5}" for i in row]) for row in state.board]
+
+        return '-' * len(rows[0]) + '\n' + "\n".join(rows) + '\n' + '-' * len(rows[0]) + '\n'

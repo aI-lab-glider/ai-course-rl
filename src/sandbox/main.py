@@ -1,15 +1,11 @@
 import sys
 from pathlib import Path
-
-from sandbox.action_selection_rules.epsilon_greedy import EpsilonGreedyActionSelection
-
-
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
 import gym
 from sandbox.enviroments.twenty_forty_eight.env import TwentyFortyEightEnv
-
+from sandbox.action_selection_rules.epsilon_greedy import EpsilonGreedyActionSelection
 from sandbox.algorithms.td_zero.td_zero import TDZero
 from sandbox.wrappers.stats_wrapper import StatsWrapper
 from sandbox.algorithms.q_learning.qlearning import QLearning
@@ -29,7 +25,7 @@ def main():
     
     policy = EpsilonGreedyActionSelection(0.1)
     algorithm = QLearning(0.5, 1, policy)
-    agent = algorithm.run(10, env)
+    agent = algorithm.run(1000, env)
     env.to_gif()
     env.plot()
     env.close()

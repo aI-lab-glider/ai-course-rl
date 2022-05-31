@@ -13,7 +13,7 @@ from sandbox.enviroments.twenty_forty_eight.game.action import TwentyFortyEightP
 
 
 class TwentyFortyEightEnv(gym.Env):
-    def __init__(self, invalid_move_threshold=16, invalid_move_percentage=0.1):
+    def __init__(self, invalid_move_threshold=16, invalid_move_percentage=0.1, is_recording=True):
         self.game = TwentyFortyEightGame()
         self.heuristic = TwentyFortyEightHeuristic(self.game)
         self.state = self.game.initial_game_state()
@@ -24,6 +24,7 @@ class TwentyFortyEightEnv(gym.Env):
         self._total_action_count = 0
         self._invalid_action_count = 0
         self._images = []
+        self._is_recording = is_recording
 
     def step(self, action: int) -> Tuple[str, float, bool, dict]:
         new_state = self._update_state(action)
@@ -35,6 +36,8 @@ class TwentyFortyEightEnv(gym.Env):
         self.state = new_state
         observation = self.to_exponents(self.state.board.flatten())
         info = {}
+        if self._is_recording:
+            self._images.append(self.render("human"))
         return str(observation), float(reward), done, info
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None) -> Union[
@@ -46,7 +49,12 @@ class TwentyFortyEightEnv(gym.Env):
         return self.to_exponents(self.state.board.flatten())
 
     def render(self, mode="human"):
-        self._images.append(self.game.to_image(self.state))
+        match mode:
+            case "human":
+                return self.game.to_image(self.state)
+            case "ansi":
+                return self.game.to_ansi(self.state)
+    
 
     def _update_state(self, action: int) -> TwentyFortyEightState:
         self._total_action_count += 1
@@ -64,11 +72,9 @@ class TwentyFortyEightEnv(gym.Env):
         return self._invalid_action_count > self.invalid_move_threshold \
             and self._invalid_action_count > self._total_action_count * self.invalid_move_percentage
 
-    def to_gif(self, img_name="2048_env_game"):
-        # print("AAAAAAAAAAAAAAAAAAAA we half way there")
+    def to_gif(self, img_name="2048_env_game.gif"):
         self._images[0].save(img_name, save_all=True, append_images=self._images[1:],
                              format='GIF', optimize=False, duration=500, loop=1)
-        print(self._images[0])
 
 
     @staticmethod
