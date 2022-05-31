@@ -3,7 +3,7 @@ from typing import Generic
 from gym.core import ObsType, ActType
 
 @dataclass
-class StateValueAgent(Generic[ObsType, ActType]):
+class StateValuePolicy(Generic[ObsType, ActType]):
     state_value_estimates: dict[ObsType, float]
     _learned_actions: dict[ObsType, ActType]
 

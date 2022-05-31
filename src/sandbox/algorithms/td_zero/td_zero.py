@@ -7,20 +7,21 @@ from typing import Generic, NamedTuple, Protocol
 
 import numpy as np
 from gym.core import ActType, ObsType
-from sandbox.agents.state_value_agent import StateValueAgent
+from sandbox.action_selection_rules.greedy import GreedyActionSelection
+from sandbox.agents.state_value_policy import StateValuePolicy
 from sandbox.algorithms.algorithm import Algorithm
-from sandbox.policies.generic_policies import (ActionCandidate, GreedyPolicy,
-                                               Policy)
+from sandbox.action_selection_rules.generic import (ActionCandidate,
+                                               ActionSelectionRule)
 from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
 
 
 
-class TDZero(Algorithm[ObsType, ActType, StateValueAgent]):
+class TDZero(Algorithm[ObsType, ActType, StateValuePolicy]):
 
-    def __init__(self, alpha: float, gamma: float, policy: Policy[ActType]) -> None:
+    def __init__(self, alpha: float, gamma: float, action_selection_rule: ActionSelectionRule[ActType]) -> None:
         self._alpha = alpha
         self._gamma = gamma
-        self._policy = policy
+        self._action_selection_rule = action_selection_rule
 
     def run(self, n_episodes: int, env: DiscreteEnvironment[ObsType, ActType]):
         state_value_estimates = {}
@@ -29,12 +30,12 @@ class TDZero(Algorithm[ObsType, ActType, StateValueAgent]):
             is_done = False
             while not is_done:
                 print(env.render('ansi'))
-                action = self._policy(self._get_action_candidates(env, state_value_estimates))
+                action = self._action_selection_rule(self._get_action_candidates(env, state_value_estimates))
                 next_observation, reward, is_done, info = env.step(action)
                 expected_reward = self._calculate_expected_reward(from_observation, next_observation, reward, state_value_estimates)
                 state_value_estimates[from_observation] = expected_reward
                 from_observation = next_observation
-        return StateValueAgent(
+        return StateValuePolicy(
             state_value_estimates,
             self._create_observation_to_action_mapping(env, state_value_estimates)
         )
@@ -59,7 +60,7 @@ class TDZero(Algorithm[ObsType, ActType, StateValueAgent]):
 
     def _create_observation_to_action_mapping(self, env: DiscreteEnvironment[ObsType, ActType], state_value_estimates: dict[ObsType, float]) -> dict[ObsType, ActType]:
         result = {}
-        greedy_policy = GreedyPolicy[ActType]()
+        greedy_policy = GreedyActionSelection[ActType]()
         is_done = False
         from_observation = env.reset()
         while not is_done:
