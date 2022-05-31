@@ -1,12 +1,11 @@
 import sys
 from pathlib import Path
-
-
-
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
 import gym
+from sandbox.enviroments.twenty_forty_eight.env import TwentyFortyEightEnv
+from sandbox.action_selection_rules.epsilon_greedy import EpsilonGreedyActionSelection
 from sandbox.algorithms.td_zero.td_zero import TDZero
 from sandbox.wrappers.stats_wrapper import StatsWrapper
 from sandbox.algorithms.q_learning.qlearning import QLearning
@@ -19,14 +18,15 @@ import matplotlib.pyplot as plt
 
 def main():
 
-    env = gym.make("CliffWalking-v0")
+    # env = gym.make("CliffWalking-v0")
+    env = TwentyFortyEightEnv()
     env = StatsWrapper(env)
     env = DiscreteEnvironment(env)
     
-    action_selection_rule = ThompsonSampling()
-    algorithm = QLearning(0.5, 1, action_selection_rule)
-    agent = algorithm.run(300, env)
-    
+    policy = EpsilonGreedyActionSelection(0.1)
+    algorithm = QLearning(0.5, 1, policy)
+    agent = algorithm.run(1000, env)
+    env.to_gif()
     env.plot()
     env.close()
 
