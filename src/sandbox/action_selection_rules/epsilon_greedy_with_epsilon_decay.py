@@ -10,7 +10,7 @@ class EpsilonGreedyActionSelectionWithDecayEpsilon(ActionSelectionRule[ActType])
         self.decay_step = decay_step
     
     def _select_action(self, action_rewards: list[ActionCandidate[ActType]]) -> ActType:
-        epsilon_greedy_policy = EpsilonGreedyActionSelection[ActType](self.epsilon)
-        action = epsilon_greedy_policy(action_rewards)
+        epsilon_greedy_action_selection = EpsilonGreedyActionSelection[ActType](self.epsilon)
+        action = epsilon_greedy_action_selection(action_rewards)
         self.epsilon *= self.decay_step
         return action

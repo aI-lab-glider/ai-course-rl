@@ -1,3 +1,4 @@
+import logging
 import random
 from argparse import Action
 from collections import namedtuple
@@ -8,7 +9,7 @@ from typing import Generic, NamedTuple, Protocol
 import numpy as np
 from gym.core import ActType, ObsType
 from sandbox.action_selection_rules.greedy import GreedyActionSelection
-from sandbox.agents.state_value_policy import StateValuePolicy
+from sandbox.policies.state_value_policy import StateValuePolicy
 from sandbox.algorithms.algorithm import Algorithm
 from sandbox.action_selection_rules.generic import (ActionCandidate,
                                                ActionSelectionRule)
@@ -29,7 +30,7 @@ class TDZero(Algorithm[ObsType, ActType, StateValuePolicy]):
             from_observation, info = env.reset(seed=42, return_info=True)
             is_done = False
             while not is_done:
-                print(env.render('ansi'))
+                logging.debug(env.render('ansi'))
                 action = self._action_selection_rule(self._get_action_candidates(env, state_value_estimates))
                 next_observation, reward, is_done, info = env.step(action)
                 expected_reward = self._calculate_expected_reward(from_observation, next_observation, reward, state_value_estimates)

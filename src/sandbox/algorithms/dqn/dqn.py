@@ -1,30 +1,60 @@
+from __future__ import annotations
+import logging
+from sandbox.action_selection_rules.generic import ActionSelectionRule
+from sandbox.policies.nn_policy import QNetwork
+from sandbox.algorithms.algorithm import Algorithm
 from sandbox.algorithms.dqn.replay_buffer import ReplayMemory, Transition
-from sandbox.algorithms.dqn.policy import QNetwork
+
 
 import gym
 import gym.spaces
-from abc import ABC
-from typing import Callable
+from typing import Callable, TypeVar
 import numpy as np
 import tensorflow as tf
 
+from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
 
-class DQNAlgorithm:
+
+QNetworkType = TypeVar('QNetworkType', bound=QNetwork)
+class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
     def __init__(
         self,
-        env: gym.Env,
         memory_size: int,
-        network: type[QNetwork],
-        policy: Callable,
+        create_network: Callable[[gym.spaces.Box, gym.spaces.Discrete, float], QNetworkType],
+        action_selection_rule: ActionSelectionRule[int],
         learning_rate: float,
+        max_episode_length: int,
+        exploration_steps: int,
+        target_update_steps: int,
+        batch_size: int,
+        discount_rate: float,
     ):
-        self.env = env
         self.replay_buffer = ReplayMemory(memory_size)
-        self.network = network(env.observation_space, env.action_space, learning_rate)
-        self.target_network = self.network.copy()
-        self.policy = policy
+        self.create_network = create_network
+        self.learning_rate = learning_rate
+        self.action_selection_rule = action_selection_rule
+        self.max_episode_length = max_episode_length
+        self.exploration_steps = exploration_steps
+        self.target_update_steps = target_update_steps
+        self.batch_size = batch_size
+        self.discount_rate = discount_rate
 
-    def train(
+
+    def run(self, n_episodes: int, env: DiscreteEnvironment[np.ndarray, int]) -> QNetworkType:
+        self.env = env
+        self.network = self.create_network(env.observation_space, env.action_space, self.learning_rate)
+        self.target_network = self.network.copy()
+        return self._train(
+            n_episodes,
+            self.max_episode_length,
+            self.exploration_steps,
+            self.target_update_steps,
+            self.batch_size,
+            self.discount_rate,
+        )
+
+
+    def _train(
         self,
         n_episodes: int,
         max_episode_length: int,
@@ -32,11 +62,12 @@ class DQNAlgorithm:
         target_update_steps: int,
         batch_size: int,
         discount_rate: float,
-    ):
+    ) -> QNetworkType:
         self.discount_rate = discount_rate
         self.episodes_length = []
 
         for episode in range(n_episodes):
+            logging.info(f"Starting episode: {episode}")
             self._rollout(max_episode_length)
             if len(self.replay_buffer) <= exploration_steps:
                 continue
@@ -54,15 +85,16 @@ class DQNAlgorithm:
                 break
         self.episodes_length.append(t)
 
-    def _play_one_step(self, state) -> tuple[np.ndarray, float, bool, dict]:
-        action = self.policy(state, self.network, self.env.action_space)
+    def _play_one_step(self, observation: np.ndarray[np._ShapeType, float]) -> tuple[np.ndarray, float, bool, dict]:
+        Q_values = self.network.predict(observation)
+        action = self.action_selection_rule(Q_values)
         next_state, reward, done, info = self.env.step(action)
-        self.replay_buffer.push(Transition(state, action, next_state, reward, done))
+        self.replay_buffer.push(Transition(observation, action, next_state, reward, done))
         return next_state, reward, done, info
 
     def _training_step(self, batch_size: int) -> None:
         transitions = self.replay_buffer.sample(batch_size)
-        states, actions, next_states, rewards, dones = list(
+        observations, actions, next_states, rewards, dones = list(
             map(np.array, zip(*transitions))
         )
         next_Q_values = self.network.predict(next_states)
@@ -77,6 +109,6 @@ class DQNAlgorithm:
             rewards + (1 - dones) * self.discount_rate * next_target_Q_values
         )
         target_Q_values = target_Q_values.reshape(-1, 1)
-        mask = tf.one_hot(actions, self.env.action_space.n)
+        mask = tf.one_hot(actions, self.env.action_space.n).numpy()
 
-        self.network.update(states, mask, target_Q_values)
+        self.network.update(observations, mask, target_Q_values)
