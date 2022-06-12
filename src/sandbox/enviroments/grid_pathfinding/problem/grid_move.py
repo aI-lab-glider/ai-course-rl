@@ -15,19 +15,6 @@ class GridMove(Enum):
     SE = (1, 1)
 
     @staticmethod
-    def from_value(value: Tuple[int,int]) -> GridMove:
-        return {
-            (-1, 0): GridMove.N,
-            (1, 0): GridMove.S,
-            (0, -1): GridMove.W,
-            (0, 1): GridMove.E,
-            (-1, -1): GridMove.NW,
-            (-1, 1): GridMove.NE,
-            (1, -1): GridMove.SW,
-            (1, 1): GridMove.SE,
-        }[value]
-
-    @staticmethod
     def diagonal_moves() -> Set[GridMove]:
         return {GridMove.NW, GridMove.NE, GridMove.SW, GridMove.SE}
 
@@ -36,7 +23,14 @@ class GridMove(Enum):
             return [self]
         shift_l = (0, self.value[1])
         shift_r = (self.value[0], 0)
-        return [self, GridMove.from_value(shift_l), GridMove.from_value(shift_r)]
+        return [self, GridMove(shift_l), GridMove(shift_r)]
 
     def __str__(self) -> str:
         return self.name
+    
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, index):
+        return self.value[index]
+

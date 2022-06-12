@@ -1,4 +1,6 @@
 from __future__ import annotations
+import stat
+from typing_extensions import Self
 from sandbox.enviroments.base.problem import Problem
 from sandbox.enviroments.base.problem import ReversibleProblem
 from sandbox.enviroments.grid_pathfinding.problem.grid import Grid, GridCell, GridCoord
@@ -7,7 +9,6 @@ from typing import List, Optional, Tuple
 import numpy as np
 from PIL import Image, ImageDraw
 
-# from utils.pil_utils import GridDrawer
 
 
 class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
@@ -62,9 +63,31 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
         # grid_drawer.draw_circle(self.goal.x, self.goal.y, fill=(255, 100, 100))
         # grid_drawer.draw_circle(state.x, state.y, (100, 100, 100))
         # return image
+    
+    def to_str(self, agent_location: GridCoord) -> str:
+        grid = ""
+        for y, row in enumerate(self.grid):
+            for x, cell in enumerate(row):
+                if agent_location == GridCoord(x, y):
+                    grid += " A "
+                elif self.goal == GridCoord(x, y):
+                    grid += " G "
+                elif cell == GridCell.WALL:
+                    grid += " W "
+                else: 
+                    grid += " . "
+            grid += "\n"
+        return grid
+
+
+    @classmethod
+    def from_file(cls, file) -> Self:
+        with open(file) as f:
+            lines = f.read()
+            return cls.deserialize(lines)
 
     @staticmethod
-    def deserialize(text: str) -> GridPathfinding:
+    def deserialize(text: str) -> Self:
         lines = text.splitlines()
         header = lines[0]
         raw_width, raw_diagonal_weight = header.strip().split()

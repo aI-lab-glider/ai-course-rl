@@ -29,6 +29,12 @@ class GridCoord(State):
 
     def __iter__(self):
         return iter((self.y, self.x))
+    
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, index):
+        return [self.x, self.y][index]
 
 
 @dataclass(frozen=True)

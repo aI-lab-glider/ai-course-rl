@@ -6,34 +6,26 @@ import gym
 path = Path(__file__)
 sys.path.append(str(path.parents[1].absolute()))
 
+import sandbox.enviroments
 from sandbox.action_selection_rules.epsilon_greedy import EpsilonGreedyActionSelection
-from sandbox.algorithms.dqn import DQNAlgorithm, MyQNetwork
+from sandbox.algorithms.dqn import DQNAlgorithm, MyQNetwork, policy
+from sandbox.algorithms.q_learning.qlearning import QLearning
+from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
+from sandbox.wrappers.stats_wrapper import StatsWrapper
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-    env = gym.make("CartPole-v1")
-    dqn = DQNAlgorithm(
-        memory_size=2000,
-        create_network=MyQNetwork,
-        action_selection_rule=EpsilonGreedyActionSelection(0.01),
-        learning_rate=1e-2,
-        max_episode_length=200,
-        exploration_steps=50,
-        target_update_steps=50,
-        batch_size=32,
-        discount_rate=0.95,
+    # NOTE: change logging level to info if you don't want to see ansi renders of env
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s\n%(message)s')
+    env = gym.make("custom/gridpathfinding-v0",
+        file="src/sandbox/enviroments/grid_pathfinding/bencmarks/22.txt"
     )
-    q_network = dqn.run(
-        n_episodes=60,
-        env=env
-    )
-
-    enjoy(
-        env=env,
-        action_selection=lambda state: int(np.argmax(q_network.predict(state))),
-        steps=2_000
-    )
+    env = DiscreteEnvironment(env)
+    env = StatsWrapper(env)
+    algorithm = QLearning(0.1, 0.1, EpsilonGreedyActionSelection(0.05))
+    policy = algorithm.run(1000, env)
+    env.plot()
+    
 
 def enjoy(env, action_selection, steps) -> None:
     state = env.reset()
