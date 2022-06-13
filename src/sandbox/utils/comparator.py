@@ -8,10 +8,12 @@ from sandbox.wrappers.stats_wrapper import PlotType, StatsWrapper
 
 
 class Comparator:
-    def __init__(self, algorithms: list[Algorithm], envs: list[gym.Env], get_label: Callable[[Algorithm], str]) -> None:
+    def __init__(self, algorithms: list[Algorithm], envs: list[gym.Env], get_label: Callable[[Algorithm], str],
+                 live_plotting: bool = True) -> None:
         self.algorithms = algorithms
         self.envs = envs
         self.get_label = get_label
+        self.live_plotting = live_plotting
 
     def run(self, plot_types: list[PlotType]):
         _, axs = plt.subplots(len(self.envs), len(plot_types), figsize=(10, 10), squeeze=False)
@@ -20,9 +22,10 @@ class Comparator:
             env_axs = axs[i]
             for algo, color in zip(self.algorithms, algo_colors):
                 env = deepcopy(env)
-                env = StatsWrapper(env)
-                _ = algo.run(5000, env)
+                env = StatsWrapper(env, self.live_plotting)
+                _ = algo.run(100, env)
                 env.plot(types=plot_types, ax=env_axs, color=color)
             for ax in env_axs:
                 ax.legend([self.get_label(a) for a in self.algorithms])
+        plt.ioff()
         plt.show()
