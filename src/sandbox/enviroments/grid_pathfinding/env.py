@@ -35,6 +35,9 @@ class GridPathfindingEnv(gym.Env):
 
         self._agent_location = initial
         self._goal_transition_prob = goal_transition_prob
+        
+        self._step_limit = 100*self.size
+        self._steps = 0
 
 
 
@@ -52,7 +55,11 @@ class GridPathfindingEnv(gym.Env):
             valid_goal_transitions = [m for m in GridMove if self._is_legal_move(goal, m)]
             self.problem.goal  = self._take_action(goal, choice(valid_goal_transitions))
 
-        reward = 1 if done else 0
+        self._steps += 1
+        if self._steps > self._step_limit:
+            done = True
+        reward = -1
+        
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
     
@@ -68,7 +75,7 @@ class GridPathfindingEnv(gym.Env):
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:
         self._agent_location = self.problem.initial
-
+        self._steps = 0
         observation = self._get_obs()
         info = self._get_info()
 

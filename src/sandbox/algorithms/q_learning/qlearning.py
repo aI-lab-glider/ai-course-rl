@@ -21,7 +21,8 @@ class QLearning(Algorithm[ObsType, ActType, ActionValuePolicy]):
 
     def run(self, n_episodes: int, env: DiscreteEnvironment[ObsType, ActType]):
         action_value_estimates = defaultdict(lambda: np.zeros(env.n_actions))
-        for _ in range(n_episodes):
+        for i in range(n_episodes):
+            logging.info(f'Starting episode {i}')
             self._run_episode(env, action_value_estimates)
         return ActionValuePolicy(
             action_value_estimates,

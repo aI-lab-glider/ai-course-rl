@@ -13,4 +13,4 @@ class DiscreteEnvironment(gym.Wrapper[ObsType, ActType]):
 
     def actions(self) -> list[ActType]:
         return [i for i in range(self.env.action_space.n)]
-    
+        

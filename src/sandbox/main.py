@@ -58,7 +58,7 @@ def main():
         ],
         get_label=lambda algo: type(algo._select_action).__name__
     )
-    cmp.run([PlotType.CumRewardvsTime, PlotType.EpisodeLengthHist])
+    cmp.run([PlotType.RewardsVsEpNumber, PlotType.EpisodeLengthHist])
 
 def enjoy(env, action_selection, steps) -> None:
     state = env.reset()
