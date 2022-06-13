@@ -10,6 +10,6 @@ class Algorithm(Generic[ObsType, ActType, PolicyType],ABC):
         ...
 
     @abstractmethod
-    def run(self, n_episodes: int, evn: gym.Env[ObsType, ActType]) -> PolicyType:
+    def run(self, n_episodes: int, env: gym.Env[ObsType, ActType]) -> PolicyType:
         ...
         

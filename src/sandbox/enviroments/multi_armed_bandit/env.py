@@ -7,7 +7,7 @@ NormalDistribution = namedtuple("NormalDistribution", "mean std")
 
 
 
-class BanditEnv(gym.Env):
+class BanditEnv(gym.Env[int, None]):
 
     def __init__(self, reward_distributions: list[NormalDistribution]):
         self.distributions = reward_distributions.copy()
@@ -15,7 +15,7 @@ class BanditEnv(gym.Env):
 
         self.action_space = gym.spaces.Discrete(self.n_bandits)
         self.observation_space = gym.spaces.Discrete(1) 
-        self._observation = 0 # bandit env has no observation, but has to return something
+        self._observation = None # bandit env has no observation, but has to return something
 
     def step(self, action: int):
         if not self.action_space.contains(action):
