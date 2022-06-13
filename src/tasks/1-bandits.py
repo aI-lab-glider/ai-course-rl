@@ -1,6 +1,7 @@
 import logging
 from random import random
 from sandbox.action_selection_rules.greedy import GreedyActionSelection
+from sandbox.action_selection_rules.thompson_sampling import ThompsonSampling
 from sandbox.enviroments.multi_armed_bandit.env import NormalDistribution
 from sandbox.utils.comparator import Comparator
 from sandbox.wrappers.stats_wrapper import PlotType
@@ -11,6 +12,16 @@ from sandbox.action_selection_rules.ucb import UCB
 
 from sandbox.algorithms.bandits_algorithm.bandits_algorithm import BanditsAlgorithm
 
+def _plot_name(algorithm: BanditsAlgorithm) -> str:
+    match algorithm._select_action:
+        case GreedyActionSelection():
+            return "greedy"        
+        case EpsilonGreedyActionSelection(eps):
+            return f"greedy(eps = {eps})"
+        case UCB(c):
+            return f"UCB(c = {c})"
+        case ThompsonSampling():
+            return f"Thompson"
 
 if __name__ == '__main__':
     # NOTE: change logging level to info if you don't want to see ansi renders of env
@@ -19,13 +30,21 @@ if __name__ == '__main__':
         algorithms=[
             BanditsAlgorithm(action_selection_rule)
             for action_selection_rule in 
-                [GreedyActionSelection(),EpsilonGreedyActionSelection(0.01), EpsilonGreedyActionSelection(0.1), UCB()]
+                [
+                    GreedyActionSelection(),
+                    EpsilonGreedyActionSelection(0.01), 
+                    EpsilonGreedyActionSelection(0.1), 
+                    EpsilonGreedyActionSelection(0.5),
+                    UCB(0.4), 
+                    UCB(1.414), 
+                    UCB(10), 
+                    ThompsonSampling()]
             ],
         envs=[gym.make(
             "custom/multiarmed-bandits-v0",
-            reward_distributions=[NormalDistribution(random(), random()) for _ in range(5)]
+            reward_distributions=[NormalDistribution(random(), random()) for _ in range(100)]
             )
         ],
-        get_label=lambda algo: type(algo._select_action).__name__
+        get_label=_plot_name, n_episodes=5000
     )
     cmp.run([PlotType.CumulatedReward])

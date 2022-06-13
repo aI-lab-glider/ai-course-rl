@@ -1,10 +1,14 @@
+from dataclasses import dataclass
 from gym.core import ActType
 import random
 
 from sandbox.action_selection_rules.generic import ActionCandidate, ActionSelectionRule
 from sandbox.action_selection_rules.greedy import GreedyActionSelection
 
+@dataclass
 class EpsilonGreedyActionSelection(ActionSelectionRule[ActType]):
+    epsilon: float 
+    
     def __init__(self, epsilon: float) -> None:
         self.epsilon = epsilon
         self._greedy_policy = GreedyActionSelection[ActType]()
