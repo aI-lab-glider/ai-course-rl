@@ -35,30 +35,22 @@ class GridPathfindingEnv(gym.Env):
 
         self._agent_location = initial
         self._goal_transition_prob = goal_transition_prob
-        
-        self._step_limit = 100*self.size
-        self._steps = 0
 
 
 
     def step(self, action: int) -> tuple[dict[str, GridCoord], float, bool, dict[str, float]]:
         direction = list(GridMove)[action]
+        reward = -1
+        done = False
 
         if self._is_legal_move(self._agent_location, direction):
             self._agent_location = self._agent_location + direction
             done = self.problem.is_goal(self._agent_location)
-        else:
-            done = False
         
         if random() < self._goal_transition_prob:
             goal = self.problem.goal
             valid_goal_transitions = [m for m in GridMove if self._is_legal_move(goal, m)]
-            self.problem.goal  = self._take_action(goal, choice(valid_goal_transitions))
-
-        self._steps += 1
-        if self._steps > self._step_limit:
-            done = True
-        reward = -1
+            self.problem.goal  = self._take_action(goal, choice(valid_goal_transitions)) 
         
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
