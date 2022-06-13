@@ -62,7 +62,7 @@ class GridPathfindingEnv(gym.Env):
         return self.problem.take_action(location, move)
     
     def _flatten_location(self, location: GridCoord):
-        return location.x + location.y * self.problem.grid.shape[0]
+        return location.x + location.y * self.problem.grid.shape[1]
     
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:
