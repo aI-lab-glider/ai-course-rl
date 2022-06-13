@@ -6,33 +6,46 @@ from typing import Iterable, Optional, Tuple
 import gym
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib import style
 import numpy as np
+import matplotlib
+matplotlib.use("TkAgg")
 
 @dataclass
 class Statistic:
     episode_reward: float
     steps_count: int
-    
+
     def increment(self, step_reward, length_increment):
         return Statistic(
-            self.episode_reward  + step_reward,
+            self.episode_reward + step_reward,
             self.steps_count + length_increment
         )
 
 
 STATS_KEY = 'episode_stats'
 
+
 class PlotType(IntEnum):
     RewardsVsEpNumber = auto()
     EpisodeLengthvsTime = auto()
     EpisodeLengthHist = auto()
     CumulatedReward = auto()
+
+
 class StatsWrapper(gym.Wrapper):
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env, real_time=True):
         super().__init__(env)
         self.stats: list[Statistic] = []
         self._current_statistic = Statistic(0, 0)
+        self._real_time = real_time
+        if real_time:
+            plt.ion()
+            fig, self.ax = plt.subplots(figsize=(19, 12),
+                                        constrained_layout=True)
+
 
     def step(self, action):
         observation, reward, done, info = super().step(action)
@@ -44,19 +57,26 @@ class StatsWrapper(gym.Wrapper):
 
     def reset(self, **kwargs):
         self.stats.append(self._current_statistic)
+        if self._real_time: self._animate()
         logging.info(f'Episode stats: {self._current_statistic}')
         self._current_statistic = Statistic(0, 0)
         return super().reset(**kwargs)
-        
-    def plot(self, types: PlotType = None, ax: list[Axes]=None, color=None):
+
+    def _animate(self):
+        x = [s.episode_reward for s in self.stats]
+        self.ax.plot(x, color='orange')
+        plt.pause(0.2)
+
+
+    def plot(self, types: PlotType = None, ax: list[Axes] = None, color=None):
         types = types or list(PlotType)
         episode_rewards = [s.episode_reward for s in self.stats]
         steps_count = [s.steps_count for s in self.stats]
         if ax is None:
             ax = plt.subplots(figsize=(10, 10),
-                               nrows=len(types),
-                               ncols=1,
-                               constrained_layout=True, squeeze=False)[1]
+                              nrows=len(types),
+                              ncols=1,
+                              constrained_layout=True, squeeze=False)[1]
 
         for i, type in enumerate(types):
             match type:
@@ -94,7 +114,3 @@ class StatsWrapper(gym.Wrapper):
                                '-',
                                c=color or 'orange',
                                linewidth=2)
-
-
-
-

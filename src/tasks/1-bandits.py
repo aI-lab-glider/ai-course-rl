@@ -1,5 +1,6 @@
 import logging
 from random import random
+
 from sandbox.action_selection_rules.greedy import GreedyActionSelection
 from sandbox.enviroments.multi_armed_bandit.env import NormalDistribution
 from sandbox.utils.comparator import Comparator

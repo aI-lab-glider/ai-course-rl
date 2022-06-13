@@ -1,6 +1,7 @@
 import gym
 from gym.core import ObsType, ActType
 
+
 class DiscreteEnvironment(gym.Wrapper[ObsType, ActType]):
 
     @property
