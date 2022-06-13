@@ -8,10 +8,11 @@ from sandbox.wrappers.stats_wrapper import PlotType, StatsWrapper
 
 
 class Comparator:
-    def __init__(self, algorithms: list[Algorithm], envs: list[gym.Env], get_label: Callable[[Algorithm], str]) -> None:
+    def __init__(self, algorithms: list[Algorithm], envs: list[gym.Env], get_label: Callable[[Algorithm], str], n_episodes: int = 5000) -> None:
         self.algorithms = algorithms
         self.envs = envs
         self.get_label = get_label
+        self.n_episodes = n_episodes
 
     def run(self, plot_types: list[PlotType]):
         _, axs = plt.subplots(len(self.envs), len(plot_types), figsize=(10, 10), squeeze=False)
