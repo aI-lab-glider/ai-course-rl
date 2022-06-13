@@ -21,14 +21,21 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n%(message)s')
     cmp = Comparator(
         algorithms=[
-            QLearning(.1, .9, EpsilonGreedyActionSelection(.1)),
-            # TDZero(.1, .1, EpsilonGreedyActionSelection(.1))
+            QLearning(.01, 1, EpsilonGreedyActionSelection(.1)),
+            QLearning(.05, 1, EpsilonGreedyActionSelection(.1)),
+            QLearning(.1, 1, EpsilonGreedyActionSelection(.1)),
             ],
         envs=[
             DiscreteEnvironment(gym.make(
             "custom/gridpathfinding-v0",
-            file=f"{Path(gp.__file__).parent}/bencmarks/22.txt"))
+            file=f"{Path(gp.__file__).parent}/benchmarks/4.txt")),
+            DiscreteEnvironment(gym.make(
+            "custom/gridpathfinding-v0",
+            file=f"{Path(gp.__file__).parent}/benchmarks/16.txt")),
+            DiscreteEnvironment(gym.make(
+            "custom/gridpathfinding-v0",
+            file=f"{Path(gp.__file__).parent}/benchmarks/25.txt")),
         ],
-        get_label=lambda algo: type(algo).__name__
+        get_label=lambda algo: f"{algo._alpha}", n_episodes=10000
     )
     cmp.run(list(PlotType))

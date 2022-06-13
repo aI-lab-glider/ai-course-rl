@@ -22,7 +22,7 @@ class Comparator:
             for algo, color in zip(self.algorithms, algo_colors):
                 env = deepcopy(env)
                 env = StatsWrapper(env)
-                _ = algo.run(5000, env)
+                _ = algo.run(self.n_episodes, env)
                 env.plot(types=plot_types, ax=env_axs, color=color)
             for ax in env_axs:
                 ax.legend([self.get_label(a) for a in self.algorithms])
