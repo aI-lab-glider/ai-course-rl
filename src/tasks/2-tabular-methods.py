@@ -16,9 +16,7 @@ from sandbox.algorithms.bandits_algorithm.bandits_algorithm import BanditsAlgori
 import sandbox.enviroments.grid_pathfinding as gp
 from pathlib import Path
 
-if __name__ == '__main__':
-    # NOTE: change logging level to info if you don't want to see ansi renders of env
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n%(message)s')
+def grid_pathinding_benchmark():
     cmp = Comparator(
         algorithms=[
             QLearning(.01, 1, EpsilonGreedyActionSelection(.1)),
@@ -39,3 +37,9 @@ if __name__ == '__main__':
         get_label=lambda algo: f"{algo._alpha}", n_episodes=10000
     )
     cmp.run(list(PlotType))
+
+if __name__ == '__main__':
+    # NOTE: change logging level to info if you don't want to see ansi renders of env
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n%(message)s')
+    grid_pathinding_benchmark()
+
