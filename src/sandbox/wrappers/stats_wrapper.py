@@ -43,7 +43,7 @@ class StatsWrapper(gym.Wrapper):
         self._real_time = real_time
         if real_time:
             plt.ion()
-            fig, self.ax = plt.subplots(figsize=(19, 12),
+            fig, self.ax = plt.subplots(figsize=(12, 7),
                                         constrained_layout=True)
 
 
@@ -65,7 +65,7 @@ class StatsWrapper(gym.Wrapper):
     def _animate(self):
         x = [s.episode_reward for s in self.stats]
         self.ax.plot(x, color='orange')
-        plt.pause(0.2)
+        plt.pause(0.05)
 
 
     def plot(self, types: PlotType = None, ax: list[Axes] = None, color=None):
