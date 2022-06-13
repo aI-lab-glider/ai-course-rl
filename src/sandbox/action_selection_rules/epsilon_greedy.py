@@ -10,7 +10,6 @@ class EpsilonGreedyActionSelection(ActionSelectionRule[ActType]):
         self._greedy_policy = GreedyActionSelection[ActType]()
 
     def _select_action(self, action_rewards: list[ActionCandidate[ActType]]) -> ActType:
-        best_action = self._greedy_policy(action_rewards)
         if random.random() > self.epsilon:
-            return best_action
-        return random.choice([c for c in action_rewards if c.action != best_action]).action
+            return self._greedy_policy(action_rewards)
+        return random.choice([c for c in action_rewards]).action
