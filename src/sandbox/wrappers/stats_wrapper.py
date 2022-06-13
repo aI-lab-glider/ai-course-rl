@@ -44,16 +44,15 @@ class StatsWrapper(gym.Wrapper):
         self._current_statistic = Statistic(0, 0)
         return super().reset(**kwargs)
         
-    def plot(self, types: PlotType = None):
+    def plot(self, types: PlotType = None, ax: list[Axes]=None, color=None):
         types = types or list(PlotType)
         cumulated_reward = [s.cumulative_reward for s in self.stats]
         steps_count = [s.steps_count for s in self.stats]
-        ax = plt.subplots(figsize=(10, 10),
+        if ax is None:
+            ax = plt.subplots(figsize=(10, 10),
                                nrows=len(types),
                                ncols=1,
-                               constrained_layout=True)[1]
-        if not isinstance(ax, list):
-            ax = [ax]
+                               constrained_layout=True, squeeze=False)[1]
 
         for i, type in enumerate(types):
             match type:
@@ -64,7 +63,7 @@ class StatsWrapper(gym.Wrapper):
                     ax[i].grid(axis='y', which='major')
                     ax[i].plot(cumulated_reward,
                                '-',
-                               c='orange',
+                               c=color or 'orange',
                                linewidth=2)
                 case PlotType.EpisodeLengthvsTime:
                     ax[i].set_title("Episode Length over Time")
@@ -73,14 +72,14 @@ class StatsWrapper(gym.Wrapper):
                     ax[i].grid(axis='y', which='major')
                     ax[i].plot(steps_count,
                                '-',
-                               c='orange',
+                               c=color or 'orange',
                                linewidth=2)
                 case PlotType.EpisodeLengthHist:
                     ax[i].set_title("Episode per time step")
                     ax[i].set_xlabel("Episode Length")
                     ax[i].set_ylabel("Number of Episodes")
                     ax[i].hist(steps_count,
-                               color='orange',
+                               color=color or 'orange',
                                bins=len(self.stats))
 
 
