@@ -22,5 +22,6 @@ setup(
         'pygame==2.1.2',
         'tensorflow==2.9.1',
         'typing-extensions==4.2.0',
+        'distinctipy==1.2.1'
     ],
 )
