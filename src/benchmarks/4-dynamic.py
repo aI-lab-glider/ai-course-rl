@@ -21,7 +21,7 @@ from sandbox.action_selection_rules.ucb import UCB
 from sandbox.algorithms.bandits_algorithm.bandits_algorithm import BanditsAlgorithm
 import sandbox.enviroments.grid_pathfinding as gp
 from pathlib import Path
-from tasks._tabular_benchmarks import _plot_name
+from benchmarks._tabular_benchmarks import _plot_name
 
 def dynamic_pathinding_benchmark(n_episodes: int):
     cmp = Comparator()
