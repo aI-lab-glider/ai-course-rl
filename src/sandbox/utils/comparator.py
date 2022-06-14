@@ -20,10 +20,10 @@ class Comparator:
         for i, env in enumerate(self.envs):
             env_axs = axs[i]
             for algo, color in zip(self.algorithms, algo_colors):
-                env = deepcopy(env)
-                env = StatsWrapper(env)
-                _ = algo.run(self.n_episodes, env)
-                env.plot(types=plot_types, ax=env_axs, color=color)
+                env_copy = deepcopy(env)
+                env_copy = StatsWrapper(env_copy)
+                _ = algo.run(self.n_episodes, env_copy)
+                env_copy.plot(types=plot_types, ax=env_axs, color=color)
             for ax in env_axs:
                 ax.legend([self.get_label(a) for a in self.algorithms])
         plt.show()
