@@ -1,6 +1,6 @@
 from __future__ import annotations
 import logging
-from typing import Generic, Tuple
+from typing import Callable, Generic, Tuple
 
 import numpy as np
 from gym.core import ActType, ObsType
@@ -17,7 +17,7 @@ class QLearning(Algorithm[ObsType, ActType, ActionValuePolicy]):
     def __init__(self, alpha: float, gamma: float, action_selection_rule: ActionSelectionRule[ActType]) -> None:
         self._alpha = alpha
         self._gamma = gamma
-        self._policy = action_selection_rule
+        self._action_selection_rule = action_selection_rule
 
     def run(self, n_episodes: int, env: DiscreteEnvironment[ObsType, ActType]):
         action_value_estimates = defaultdict(lambda: np.zeros(env.n_actions))
@@ -26,7 +26,7 @@ class QLearning(Algorithm[ObsType, ActType, ActionValuePolicy]):
             self._run_episode(env, action_value_estimates)
         return ActionValuePolicy(
             action_value_estimates,
-            self._policy
+            self._action_selection_rule
         )
 
     def _run_episode(self, env: DiscreteEnvironment[ObsType, ActType], action_value_estimates: dict[ActType, np.ndarray]):
@@ -34,7 +34,7 @@ class QLearning(Algorithm[ObsType, ActType, ActionValuePolicy]):
         is_done = False
         while not is_done:
             logging.debug(env.render('ansi'))
-            best_action = self._policy(
+            best_action = self._action_selection_rule(
                 action_value_estimates[from_observation])
             next_observation, reward, is_done, _ = env.step(best_action)
             expected_reward = self._calculate_expected_reward(

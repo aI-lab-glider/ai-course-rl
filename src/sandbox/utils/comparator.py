@@ -24,6 +24,7 @@ class Comparator:
         plot_types = plot_types or list(PlotType)
         _, axs = plt.subplots(len(envs), len(
             plot_types), figsize=(10, 10), squeeze=False)
+        plt.tight_layout()
         algo_colors = distinctipy.get_colors(len(algorithms))
         policies_for_all_envs = []
         for i, env in enumerate(envs):
@@ -39,7 +40,7 @@ class Comparator:
             for ax in env_axs:
                 ax.legend([get_algorithm_label(a) for a in algorithms])
 
-        # plt.show()
+        plt.show()
         return policies_for_all_envs
 
     def compare_policies(self, envs_with_policies: list[EnvPolicies], n_episodes: int, max_episode_length=10000):

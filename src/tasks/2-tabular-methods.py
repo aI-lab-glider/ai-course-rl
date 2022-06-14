@@ -34,5 +34,5 @@ if __name__ == '__main__':
             )) for problem_size in ["4", "16", "25"]],
         get_algorithm_label=lambda algo: f"{algo._alpha}",
         n_episodes=10_000,
-        plot_types=list(PlotType))
+        plot_types=[PlotType.RewardsVsEpNumber, PlotType.CumulatedReward])
     cmp.compare_policies(envs_with_policices, 100)
