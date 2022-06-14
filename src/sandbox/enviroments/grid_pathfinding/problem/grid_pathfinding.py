@@ -48,6 +48,9 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
     def is_goal(self, state: GridCoord):
         return state == self.goal
 
+    def is_mine(self, state: GridCoord):
+        return self.grid.get_cell(state) == GridCell.MINE
+
     def reversed(self):
         return GridPathfinding(self.grid, self.goal, self.initial)
 
@@ -75,6 +78,10 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
                     grid += " G "
                 elif cell == GridCell.WALL:
                     grid += " W "
+                elif cell == GridCell.MINE:
+                    grid += " * "
+                elif cell == GridCell.DYNAMIC:
+                    grid += " D "
                 else: 
                     grid += " . "
             grid += "\n"
@@ -109,6 +116,8 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
                     board[y, x] = GridCell.WALL
                 elif cell == GridCell.DYNAMIC.value:
                     board[y, x] = GridCell.DYNAMIC
+                elif cell == GridCell.MINE.value:
+                    board[y,x] = GridCell.MINE
 
         assert start is not None, "grid is missing a start cell 'S'"
         assert goal is not None, "grid is missing a goal cell 'G'"

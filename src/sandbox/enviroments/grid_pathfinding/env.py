@@ -7,7 +7,7 @@ from gym import spaces
 import numpy as np
 from math import sqrt
 
-from sandbox.enviroments.grid_pathfinding.problem.grid import GridCoord
+from sandbox.enviroments.grid_pathfinding.problem.grid import GridCell, GridCoord
 from sandbox.enviroments.grid_pathfinding.problem.grid_pathfinding import GridPathfinding, Grid, GridCoord, GridMove
 import operator as op
 
@@ -40,14 +40,16 @@ class GridPathfindingEnv(gym.Env):
 
     def step(self, action: int) -> tuple[dict[str, GridCoord], float, bool, dict[str, float]]:
         direction = list(GridMove)[action]
-        done = False
-
         old_location = self._agent_location
         valid_move = self._is_legal_move(self._agent_location, direction)
+        
         if valid_move:
             self._agent_location = self._agent_location + direction
-            done = self.problem.is_goal(self._agent_location)
-        reward = self._get_reward(old_location, self._agent_location, not valid_move, done)
+            
+        goal = self.problem.is_goal(self._agent_location)
+        mine = self.problem.is_mine(self._agent_location)
+        done = goal or mine
+        reward = self._get_reward(old_location, self._agent_location, not valid_move, goal, mine)
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
     
@@ -60,12 +62,12 @@ class GridPathfindingEnv(gym.Env):
     def _flatten_location(self, location: GridCoord):
         return location.x + location.y * self.problem.grid.shape[1]
     
-    def _get_reward(self, old_location: GridCoord, new_location: GridCoord, invalid_move: bool, done: bool):
-        # TODO: this code rewards for getting closer to the goal, but it doesn't work very well, why?
-        #       create your own reward function!        
-        new_distance = self.calculate_distance(new_location)
-        old_distance = self.calculate_distance(old_location)
-        return max(0, old_distance - new_distance)
+    def _get_reward(self, old_location: GridCoord, new_location: GridCoord, invalid_move: bool, goal: bool, mine: bool):    
+        if mine:
+            return -100
+        if goal:
+            return 100
+        return -1
 
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:

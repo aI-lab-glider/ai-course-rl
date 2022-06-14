@@ -11,6 +11,7 @@ class GridCell(Enum):
     EMPTY = " "
     WALL = "#"
     DYNAMIC = "D"
+    MINE = "*"
 
 
 @dataclass(eq=True)

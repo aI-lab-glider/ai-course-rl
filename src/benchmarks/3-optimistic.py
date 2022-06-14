@@ -17,12 +17,12 @@ import sandbox.enviroments
 import gym
 from sandbox.action_selection_rules.epsilon_greedy import EpsilonGreedyActionSelection
 from sandbox.action_selection_rules.ucb import UCB
-from tasks._tabular_benchmarks import _plot_name
+from benchmarks._tabular_benchmarks import _plot_name
 from sandbox.algorithms.bandits_algorithm.bandits_algorithm import BanditsAlgorithm
 import sandbox.enviroments.grid_pathfinding as gp
 from pathlib import Path
 
-def cliff_benchmark(n_episodes: int):
+def minefield_benchmark(n_episodes: int):
     cmp = Comparator()
     policies = cmp.compare_algorithms(
         algorithms=[
@@ -30,7 +30,10 @@ def cliff_benchmark(n_episodes: int):
             DoubleQLearning(.1, 1, EpsilonGreedyActionSelection(.1))
         ],
         envs=[
-            NamedEnv(f"Cliff walking", DiscreteEnvironment(gym.make("CliffWalking-v0")))
+            NamedEnv(f"Grid pathfinding: Minefield", DiscreteEnvironment(gym.make(
+            "custom/gridpathfinding-v0",
+            file=f"{Path(gp.__file__).parent}/benchmarks/16_minefield.txt",
+            )))
         ],
         get_algorithm_label=_plot_name,
         n_episodes=n_episodes,
@@ -41,4 +44,4 @@ if __name__ == '__main__':
     # NOTE: change logging level to info if you don't want to see ansi renders of env
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s\n%(message)s')
-    cliff_benchmark(1000)
+    minefield_benchmark(4000)
