@@ -24,11 +24,11 @@ from pathlib import Path
 def _plot_name(algorithm: Algorithm) -> str:
     match algorithm:
         case QLearning():
-            return f"QLearning(alpha={algorithm._alpha})"        
+            return f"QLearning(alpha={algorithm._alpha}, {type(algorithm._policy).__name__})"        
         case DynaQ():
-            return f"DynaQ(alpha={algorithm._alpha}, n={algorithm._planning_steps})"
+            return f"DynaQ(alpha={algorithm._alpha}, n={algorithm._planning_steps}, {type(algorithm._policy).__name__})"
         case DynaQPlus():
-            return f"DynaQPlus(alpha={algorithm._alpha}, n={algorithm._planning_steps}, kappa={algorithm._kappa})"
+            return f"DynaQPlus(alpha={algorithm._alpha}, n={algorithm._planning_steps}, kappa={algorithm._kappa}, {type(algorithm._policy).__name__})"
 
 
 def grid_pathinding_benchmark():
