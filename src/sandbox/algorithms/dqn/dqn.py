@@ -16,6 +16,8 @@ from sandbox.wrappers.discrete_env_wrapper import DiscreteEnvironment
 
 
 QNetworkType = TypeVar('QNetworkType', bound=QNetwork)
+
+
 class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
     def __init__(
         self,
@@ -39,10 +41,10 @@ class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
         self.batch_size = batch_size
         self.discount_rate = discount_rate
 
-
     def run(self, n_episodes: int, env: DiscreteEnvironment[np.ndarray, int]) -> QNetworkType:
         self.env = env
-        self.network = self.create_network(env.observation_space, env.action_space, self.learning_rate)
+        self.network = self.create_network(
+            env.observation_space, env.action_space, self.learning_rate)
         self.target_network = self.network.copy()
         return self._train(
             n_episodes,
@@ -52,7 +54,6 @@ class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
             self.batch_size,
             self.discount_rate,
         )
-
 
     def _train(
         self,
@@ -89,7 +90,8 @@ class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
         Q_values = self.network.predict(observation)
         action = self.action_selection_rule(Q_values)
         next_state, reward, done, info = self.env.step(action)
-        self.replay_buffer.push(Transition(observation, action, next_state, reward, done))
+        self.replay_buffer.push(Transition(
+            observation, action, next_state, reward, done))
         return next_state, reward, done, info
 
     def _training_step(self, batch_size: int) -> None:
@@ -99,7 +101,8 @@ class DQNAlgorithm(Algorithm[np.ndarray, int, QNetworkType]):
         )
         next_Q_values = self.network.predict(next_states)
         best_next_actions = np.argmax(next_Q_values, axis=1)
-        next_mask = tf.one_hot(best_next_actions, self.env.action_space.n).numpy()
+        next_mask = tf.one_hot(
+            best_next_actions, self.env.action_space.n).numpy()
 
         next_target_Q_values = (
             self.target_network.predict(next_states) * next_mask

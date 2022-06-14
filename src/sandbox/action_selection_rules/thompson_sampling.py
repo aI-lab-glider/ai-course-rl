@@ -9,7 +9,6 @@ from sandbox.action_selection_rules.generic import ActionCandidate, ActionSelect
 from sandbox.action_selection_rules.greedy import GreedyActionSelection
 
 
-
 class ThompsonSampling(ActionSelectionRule[ActType]):
     def __init__(self):
         self._precisions = defaultdict[ActType, float](lambda: 0.001)
@@ -23,9 +22,10 @@ class ThompsonSampling(ActionSelectionRule[ActType]):
             action=candidate.action,
             reward=self.sample(candidate.action),
         ) for candidate in action_candidates]
-        
+
         action = self._select_action(samples)
-        self.update(action, next(c.reward for c in action_candidates if c.action == action))
+        self.update(action, next(
+            c.reward for c in action_candidates if c.action == action))
         return action
 
     def sample(self, action: ActType) -> float:
@@ -35,7 +35,8 @@ class ThompsonSampling(ActionSelectionRule[ActType]):
     def update(self, action: ActType, reward: float) -> None:
         prec = self._precisions[action]
         mean = self._means[action]
-        self._means[action] = (prec*mean + self._n_calls[action]*self._avg_reward[action]) / (prec + self._n_calls[action])
+        self._means[action] = (prec*mean + self._n_calls[action] *
+                               self._avg_reward[action]) / (prec + self._n_calls[action])
         self._precisions[action] += 1
         n = self.n_calls[action]
         self.n_calls[action] += 1
@@ -44,3 +45,6 @@ class ThompsonSampling(ActionSelectionRule[ActType]):
         ]
 
         return super().update(action, reward)
+
+    def __repr__(self) -> str:
+        return type(self).__name__

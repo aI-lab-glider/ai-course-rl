@@ -1,3 +1,4 @@
+from hashlib import new
 from random import choice, random
 from typing import overload
 import gym
@@ -46,7 +47,7 @@ class GridPathfindingEnv(gym.Env):
         if valid_move:
             self._agent_location = self._agent_location + direction
             done = self.problem.is_goal(self._agent_location)
-        reward = self._get_reward(old_location, self._agent_location, not valid_move, done, self.calculate_distance(self._agent_location))
+        reward = self._get_reward(old_location, self._agent_location, not valid_move, done)
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
     
@@ -59,8 +60,13 @@ class GridPathfindingEnv(gym.Env):
     def _flatten_location(self, location: GridCoord):
         return location.x + location.y * self.problem.grid.shape[1]
     
-    def _get_reward(self, old_location: GridCoord, new_location: GridCoord, invalid_move: bool, done: bool, heuristic: float):
-        return -1
+    def _get_reward(self, old_location: GridCoord, new_location: GridCoord, invalid_move: bool, done: bool):
+        # TODO: this code rewards for getting closer to the goal, but it doesn't work very well, why?
+        #       create your own reward function!        
+        new_distance = self.calculate_distance(new_location)
+        old_distance = self.calculate_distance(old_location)
+        return max(0, old_distance - new_distance)
+
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:
         self._agent_location = self.problem.initial
