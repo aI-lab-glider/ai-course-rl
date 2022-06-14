@@ -60,6 +60,7 @@ def dynamic_pathinding_benchmark():
             DynaQPlus(.1, 1, 50, 0.01, EpsilonGreedyActionSelectionWithDecayEpsilon(0.99, 0.99)),
             DynaQ(.1, 1, 50, EpsilonGreedyActionSelectionWithDecayEpsilon(0.99, 0.99)),
             QLearning(.1, 1, EpsilonGreedyActionSelectionWithDecayEpsilon(0.99, 0.99)),
+            QLearning(.1, 1, EpsilonGreedyActionSelection(0.05))
             ],
         envs=[
             DiscreteEnvironment(gym.make(
