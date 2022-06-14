@@ -34,7 +34,7 @@ def _plot_name(algorithm: Algorithm) -> str:
 
 def grid_pathinding_benchmark():
     cmp = Comparator()
-    cmp = cmp.compare_algorithms(
+    policies = cmp.compare_algorithms(
         algorithms=[
             QLearning(.1, 1, EpsilonGreedyActionSelection(.1)),
             DynaQ(.1, 1, 50, EpsilonGreedyActionSelection(.1)),
@@ -48,12 +48,13 @@ def grid_pathinding_benchmark():
         get_algorithm_label=_plot_name,
         n_episodes=1000,
         plot_types=[PlotType.CumulatedReward])
+    cmp.compare_policies(policies, 100)
 
 
 def dynamic_pathinding_benchmark():
     n_episodes = 2000
     cmp = Comparator()
-    cmp.compare_algorithms(
+    policies = cmp.compare_algorithms(
         algorithms=[
             DynaQPlus(.1, 1, 50, 0.01,
                       EpsilonGreedyActionSelectionWithDecayEpsilon(0.99, 0.99)),
@@ -69,6 +70,7 @@ def dynamic_pathinding_benchmark():
         ],
         get_algorithm_label=_plot_name, n_episodes=n_episodes,
         plot_types=[PlotType.CumulatedReward])
+    cmp.compare_policies(policies, 100)
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ STATS_KEY = 'episode_stats'
 
 class PlotType(IntEnum):
     RewardsVsEpNumber = auto()
-    EpisodeLengthvsTime = auto()
+    EpisodeLengthvsStepsCount = auto()
     EpisodeLengthHist = auto()
     CumulatedReward = auto()
 
@@ -66,38 +66,39 @@ class StatsWrapper(gym.Wrapper):
                               nrows=len(types),
                               ncols=1,
                               constrained_layout=True, squeeze=False)[1]
+        title_prefix = f"{self.env.name}: " if hasattr(
+            self.env, 'name') else ''
 
         for i, type in enumerate(types):
             match type:
                 case PlotType.RewardsVsEpNumber:
-                    ax[i].set_title("Episode Reward over Time")
+                    ax[i].set_title(
+                        f"{title_prefix}Episode Reward vs Steps Count")
                     ax[i].set_ylabel("Reward")
-                    ax[i].set_xlabel("Time")
                     ax[i].grid(axis='y', which='major')
                     ax[i].plot(episode_rewards,
                                '-',
                                c=color or 'orange',
                                linewidth=2)
-                case PlotType.EpisodeLengthvsTime:
-                    ax[i].set_title("Episode Length over Time")
+                case PlotType.EpisodeLengthvsStepsCount:
+                    ax[i].set_title(
+                        f"{title_prefix}Episode Length vs Steps Count")
                     ax[i].set_ylabel("Episode Length")
-                    ax[i].set_xlabel("Time")
                     ax[i].grid(axis='y', which='major')
                     ax[i].plot(steps_count,
                                '-',
                                c=color or 'orange',
                                linewidth=2)
                 case PlotType.EpisodeLengthHist:
-                    ax[i].set_title("Episode per time step")
-                    ax[i].set_xlabel("Episode Length")
+                    ax[i].set_title(f"{title_prefix}Episode per steps count")
                     ax[i].set_ylabel("Number of Episodes")
                     ax[i].hist(steps_count,
                                color=color or 'orange',
                                bins=len(self.stats))
                 case PlotType.CumulatedReward:
-                    ax[i].set_title("Cumulated reward over Time")
+                    ax[i].set_title(
+                        f"{title_prefix}Cumulated reward vs Steps Count")
                     ax[i].set_ylabel("Reward")
-                    ax[i].set_xlabel("Episode number")
                     ax[i].grid(axis='y', which='major')
                     ax[i].plot(list(accumulate(episode_rewards)),
                                '-',

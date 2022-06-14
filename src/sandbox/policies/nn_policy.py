@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Tuple, TypeVar, overload
+import io
+from typing import Collection, Iterable, Tuple, TypeVar, overload
 from typing_extensions import Self
 import numpy as np
 import tensorflow as tf
@@ -8,6 +9,7 @@ from tensorflow import keras
 from keras.models import Sequential
 import gym.spaces
 import copy
+from sandbox.action_selection_rules.greedy import GreedyActionSelection
 
 from sandbox.policies.policy import Policy
 
@@ -19,7 +21,6 @@ class QNetwork(Policy):
         self.observation_space = observation_space
         self.action_space = action_space
         self.model = self.build_model()
-
         self._loss_fn = keras.losses.Huber()
         self.optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
 
@@ -54,6 +55,8 @@ class QNetwork(Policy):
 
     def predict(self, observations):
         """Predicts Q-values for all actions that could be taken from given observation"""
+        if isinstance(observations, Collection) and not isinstance(observations, np.ndarray):
+            observations = np.array(observations)
         is_batch_prediction = observations.ndim >= 2
         # if single instance was passed, make it a batch
         obs = observations[np.newaxis] if not is_batch_prediction else observations
@@ -61,7 +64,8 @@ class QNetwork(Policy):
         return predictions if is_batch_prediction else predictions[0]
 
     def select_action(self, from_observation: np.ndarray[np._ShapeType, float]) -> np.ndarray[np._ShapeType, float]:
-        return self.predict(from_observation)
+        greedy_selection = GreedyActionSelection()
+        return greedy_selection(self.predict(from_observation))
 
     def update(self, observations: np.ndarray[np._ShapeType, np.ndarray], mask: np.ndarray[np._ShapeType, np.ndarray], target_Q_values: np.ndarray[np._ShapeType, np.ndarray]) -> None:
         """
@@ -83,3 +87,8 @@ class QNetwork(Policy):
         grads = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(
             zip(grads, self.model.trainable_variables))
+
+    def __repr__(self) -> str:
+        with io.StringIO() as s:
+            self.model.summary(print_fn=lambda x: s.write(x + '\n'))
+            return f"QNetwork with {s.getvalue()}"

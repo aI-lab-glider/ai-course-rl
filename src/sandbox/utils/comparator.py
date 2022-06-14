@@ -24,6 +24,7 @@ class Comparator:
         plot_types = plot_types or list(PlotType)
         _, axs = plt.subplots(len(envs), len(
             plot_types), figsize=(10, 10), squeeze=False)
+        plt.tight_layout()
         algo_colors = distinctipy.get_colors(len(algorithms))
         policies_for_all_envs = []
         for i, env in enumerate(envs):
