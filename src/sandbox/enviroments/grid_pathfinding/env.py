@@ -39,13 +39,14 @@ class GridPathfindingEnv(gym.Env):
 
     def step(self, action: int) -> tuple[dict[str, GridCoord], float, bool, dict[str, float]]:
         direction = list(GridMove)[action]
-        reward = -1
         done = False
 
-        if self._is_legal_move(self._agent_location, direction):
+        old_location = self._agent_location
+        valid_move = self._is_legal_move(self._agent_location, direction)
+        if valid_move:
             self._agent_location = self._agent_location + direction
             done = self.problem.is_goal(self._agent_location)
-        
+        reward = self._get_reward(old_location, self._agent_location, not valid_move, done, self.calculate_distance(self._agent_location))
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
     
@@ -58,6 +59,8 @@ class GridPathfindingEnv(gym.Env):
     def _flatten_location(self, location: GridCoord):
         return location.x + location.y * self.problem.grid.shape[1]
     
+    def _get_reward(self, old_location: GridCoord, new_location: GridCoord, invalid_move: bool, done: bool, heuristic: float):
+        return -1
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:
         self._agent_location = self.problem.initial
@@ -66,7 +69,7 @@ class GridPathfindingEnv(gym.Env):
         self._total_episodes += 1
         if self._total_episodes >= self._open_after:
             self.problem.set_dynamic_walls_closed(False)
-            
+
         return (observation, info) if return_info else observation
 
     def render(self, mode):
