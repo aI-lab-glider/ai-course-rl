@@ -10,6 +10,7 @@ from dataclasses import dataclass
 class GridCell(Enum):
     EMPTY = " "
     WALL = "#"
+    DYNAMIC = "D"
 
 
 @dataclass(eq=True)

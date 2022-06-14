@@ -15,6 +15,7 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
     def __init__(self, grid: Grid, initial: GridCoord, goal: GridCoord):
         super().__init__(initial, goal)
         self.grid = grid
+        self.dynamic_wall = True
 
     def actions(self, state: GridCoord) -> List[GridMove]:
         return [a for a in GridMove if self.is_legal_move(state, a)]
@@ -27,10 +28,16 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
             return False
 
         new_location = self.grid.get_cell(new_coord)
-        if new_location == GridCell.WALL:
+        if self._is_wall(new_location):
             return False
 
         return True
+
+    def set_dynamic_walls_closed(self, closed: bool):
+        self.dynamic_wall = closed
+
+    def _is_wall(self, cell: GridCell) -> bool:
+        return cell == GridCell.WALL or (cell == GridCell.DYNAMIC and self.dynamic_wall) 
 
     def take_action(self, state: GridCoord, action: GridMove) -> GridCoord:
         return state + action.value
@@ -100,6 +107,8 @@ class GridPathfinding(ReversibleProblem[GridCoord, GridMove]):
                     goal = GridCoord(x, y)
                 elif cell == GridCell.WALL.value:
                     board[y, x] = GridCell.WALL
+                elif cell == GridCell.DYNAMIC.value:
+                    board[y, x] = GridCell.DYNAMIC
 
         assert start is not None, "grid is missing a start cell 'S'"
         assert goal is not None, "grid is missing a goal cell 'G'"
