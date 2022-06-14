@@ -31,15 +31,15 @@ class Comparator:
             training_results = EnvPolicies(env)
             policies_for_all_envs.append(training_results)
             for algo, color in zip(algorithms, algo_colors):
-                env = deepcopy(env)
-                env = StatsWrapper(env)
-                policy = algo.run(n_episodes, env)
-                env.plot(types=plot_types, ax=env_axs, color=color)
+                env_copy = deepcopy(env)
+                env_copy = StatsWrapper(env_copy)
+                policy = algo.run(n_episodes, env_copy)
+                env_copy.plot(types=plot_types, ax=env_axs, color=color)
                 training_results.policies.append(policy)
             for ax in env_axs:
                 ax.legend([get_algorithm_label(a) for a in algorithms])
 
-        # plt.show()
+        plt.show()
         return policies_for_all_envs
 
     def compare_policies(self, envs_with_policies: list[EnvPolicies], n_episodes: int, max_episode_length=10000):

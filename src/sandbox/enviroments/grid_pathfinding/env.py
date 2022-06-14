@@ -7,22 +7,22 @@ import numpy as np
 from math import sqrt
 
 from sandbox.enviroments.grid_pathfinding.problem.grid import GridCoord
-from sandbox.enviroments.grid_pathfinding.problem.gird_pathfinding import GridPathfinding, Grid, GridCoord, GridMove
+from sandbox.enviroments.grid_pathfinding.problem.grid_pathfinding import GridPathfinding, Grid, GridCoord, GridMove
 import operator as op
 
 class GridPathfindingEnv(gym.Env):
     @overload
-    def __init__(self, file, goal_transition_prob: float=0, diagonal_weight: float = 0):
+    def __init__(self, file, open_after: int = -1):
         ...
 
     @overload
-    def __init__(self, grid: Grid, initial: GridCoord, goal: GridCoord, goal_transition_prob: float=0, diagonal_weight: float = 0):
+    def __init__(self, grid: Grid, initial: GridCoord, goal: GridCoord, open_after: int = -1):
         ...
 
-    def __init__(self, file=None, grid: Grid=None, initial: GridCoord=None, goal: GridCoord=None, goal_transition_prob: float=0, diagonal_weight: float = 0) -> None:
+    def __init__(self, file=None, grid: Grid=None, initial: GridCoord=None, goal: GridCoord=None, open_after: int = -1) -> None:
         super().__init__()
-
-        self.problem = GridPathfinding.from_file(file) if file is not None else GridPathfinding(grid, initial, goal, diagonal_weight)
+        
+        self.problem = GridPathfinding.from_file(file) if file is not None else GridPathfinding(grid, initial, goal)
         
         self.size = self.problem.grid.board.size
         self.action_space = gym.spaces.Discrete(len(GridMove))
@@ -34,9 +34,8 @@ class GridPathfindingEnv(gym.Env):
         )
 
         self._agent_location = initial
-        self._goal_transition_prob = goal_transition_prob
-
-
+        self._total_episodes = 0
+        self._open_after = open_after
 
     def step(self, action: int) -> tuple[dict[str, GridCoord], float, bool, dict[str, float]]:
         direction = list(GridMove)[action]
@@ -46,11 +45,6 @@ class GridPathfindingEnv(gym.Env):
         if self._is_legal_move(self._agent_location, direction):
             self._agent_location = self._agent_location + direction
             done = self.problem.is_goal(self._agent_location)
-        
-        if random() < self._goal_transition_prob:
-            goal = self.problem.goal
-            valid_goal_transitions = [m for m in GridMove if self._is_legal_move(goal, m)]
-            self.problem.goal  = self._take_action(goal, choice(valid_goal_transitions)) 
         
         info = self._get_info()
         return self._get_obs(), float(reward), done, info
@@ -67,10 +61,12 @@ class GridPathfindingEnv(gym.Env):
 
     def reset(self, seed=None, return_info=False, options=None) -> dict[str, float] or dict[str, GridCoord]:
         self._agent_location = self.problem.initial
-        self._steps = 0
         observation = self._get_obs()
         info = self._get_info()
-
+        self._total_episodes += 1
+        if self._total_episodes >= self._open_after:
+            self.problem.set_dynamic_walls_closed(False)
+            
         return (observation, info) if return_info else observation
 
     def render(self, mode):
